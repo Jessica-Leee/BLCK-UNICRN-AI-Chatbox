@@ -42,7 +42,7 @@ class PineconeRetriever:
     def __init__(self, pinecone_api_key, openai_api_key):
         # Initialize Pinecone connection
         self.pc = Pinecone(api_key=pinecone_api_key)
-        self.index_name = "pdf-vector-store"
+        self.index_name = "blckunicrn"
         self.index = self.pc.Index(self.index_name)
 
         # Initialize OpenAI model and embeddings

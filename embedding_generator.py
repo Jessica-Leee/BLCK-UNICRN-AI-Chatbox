@@ -2,13 +2,12 @@ from dotenv import load_dotenv
 import os
 import tiktoken
 import openai
-import fitz  
+import fitz
 from pinecone import Pinecone, ServerlessSpec
-
 load_dotenv()
 
-DOC_NAME = "onverse.pdf"
-ID = "onverse"
+SOURCES = ["onverse.pdf", "Book.pdf", "sony_music.pdf", "research_immersive_experience.pdf", "audience_report_immersive.pdf"]
+IDs = ["onverse", "book", "sony music", "research", "audience report"]
 
 class PDFLoader:
     def __init__(self, pdf_path):
@@ -55,7 +54,7 @@ class PineconeStore:
         if not pinecone_api_key:
             raise ValueError("PINECONE_API_KEY environment variable not set")
         self.pc = Pinecone(api_key=pinecone_api_key)
-        self.index_name = "pdf-vector-store"
+        self.index_name = "blckunicrn"
         if not self.pc.has_index(self.index_name):
             self.pc.create_index(
                 name=self.index_name,
@@ -76,14 +75,14 @@ class PineconeStore:
             }
             index.upsert(vectors=[(vector_id, vector, chunk_metadata)])
 
-# Build a file path relative to this script's location
-script_dir = os.path.dirname(os.path.abspath(__file__))
-pdf_path = os.path.join(script_dir, DOC_NAME)
 
 # Process the PDF and store vectors in Pinecone
-loader = PDFLoader(pdf_path)
-text = loader.extract_text()
-generator = Generator()
-chunks, embeddings = generator.process_text(text, chunk_size=800)
-vector_store = PineconeStore()
-vector_store.save_vectors(embeddings, {"id": ID, "source": DOC_NAME}, chunks)
+for i in range(len(SOURCES)):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    pdf_path = os.path.join(script_dir, SOURCES[i])
+    loader = PDFLoader(pdf_path)
+    text = loader.extract_text()
+    generator = Generator()
+    chunks, embeddings = generator.process_text(text, chunk_size=800)
+    vector_store = PineconeStore()
+    vector_store.save_vectors(embeddings, {"id": IDs[i], "source": SOURCES[i]}, chunks)
