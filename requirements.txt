@@ -8,3 +8,4 @@ langchain-openai==0.0.2
 openai==1.4.0
 PyMuPDF==1.23.0
 tiktoken==0.5.1
+pymupdf==1.23.0 --only-binary=pymupdf
