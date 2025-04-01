@@ -9,7 +9,9 @@ try:
 except ImportError:
     # If dotenv is not available, we'll use Streamlit secrets instead
     pass
-import pinecone
+
+# Updated import for new Pinecone client
+from pinecone import Pinecone
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.chains import RetrievalQA
@@ -68,10 +70,10 @@ Oneverse is part of blckunicrn.
 
 class PineconeRetriever:
     def __init__(self, pinecone_api_key, openai_api_key):
-        # Initialize Pinecone connection
-        pinecone.init(api_key=pinecone_api_key)
+        # Initialize Pinecone connection using new API
+        self.pc = Pinecone(api_key=pinecone_api_key)
         self.index_name = "blckunicrn"
-        self.index = pinecone.Index(self.index_name)
+        self.index = self.pc.Index(self.index_name)
 
         # Initialize OpenAI model and embeddings
         self.embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
