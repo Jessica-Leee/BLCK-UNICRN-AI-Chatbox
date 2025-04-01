@@ -1,0 +1,7 @@
+streamlit
+requests
+pinecone-client
+langchain
+langchain-openai
+langchain-pinecone
+python-dotenv

@@ -1,14 +1,17 @@
 import os
 import streamlit as st
 import requests
-from dotenv import load_dotenv
+import os  # Already imported
+
+# Streamlit secrets
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+pinecone_api_key = st.secrets["PINECONE_API_KEY"]
 from pinecone import Pinecone
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.chains import RetrievalQA
 
 # Load environment variables
-load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")  # make sure this is set
 
 class StreamlitApp:
@@ -67,6 +70,7 @@ class PineconeRetriever:
 
 # Initialize the PineconeRetriever instance
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
+print(pinecone_api_key)
 pinecone_retriever = PineconeRetriever(pinecone_api_key=pinecone_api_key, openai_api_key=openai_api_key)
 
 # Function to call DeepSeek API

@@ -1,13 +1,16 @@
-from dotenv import load_dotenv
 import os
 import tiktoken
 import openai
 import fitz
 from pinecone import Pinecone, ServerlessSpec
-load_dotenv()
+import os  # Already imported
 
-SOURCES = ["onverse.pdf", "Book.pdf", "sony_music.pdf", "research_immersive_experience.pdf", "audience_report_immersive.pdf"]
-IDs = ["onverse", "book", "sony music", "research", "audience report"]
+# Streamlit secrets
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+
+SOURCES = ["onverse.pdf", "Book.pdf", "sony_music.pdf", "research_immersive_experience.pdf", "audience_report_immersive.pdf","Annual Report.pdf","Article Paper.pdf","Data vision.pdf","Immersive Analytics.pdf","immersive technology.pdf","Outlook.pdf","Slide Deck.pdf"]
+IDs = ["onverse", "book", "sony music", "research", "audience report","Annual Report","Article Paper","Data vision","Immersive Analytics","immersive technology","Outlook","Slide Deck"]
 
 class PDFLoader:
     def __init__(self, pdf_path):
@@ -82,7 +85,10 @@ for i in range(len(SOURCES)):
     pdf_path = os.path.join(script_dir, SOURCES[i])
     loader = PDFLoader(pdf_path)
     text = loader.extract_text()
+    print("text_extracted")
     generator = Generator()
     chunks, embeddings = generator.process_text(text, chunk_size=800)
+    print("embeddings_converted")
     vector_store = PineconeStore()
     vector_store.save_vectors(embeddings, {"id": IDs[i], "source": SOURCES[i]}, chunks)
+    print("vectors saved")

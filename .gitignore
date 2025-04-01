@@ -1,2 +1,49 @@
+# Environment Variables
 .env
+*.env
 
+# Virtual Environment
+env/
+venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependency Files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs & Debug
+*.log
+debug.log
+
+# Dataset & Large Files
+*.csv
+*.tsv
+*.json
+*.db
+*.sqlite
+*.h5
+*.pkl
+*.sav
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.pdf
+
+# IDE/Editor Files
+.vscode/
+.idea/
+*.iml
+
+# Streamlit & Flask Cache
+.streamlit/
+instance/
+
+# MacOS
+.DS_Store
