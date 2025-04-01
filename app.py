@@ -12,7 +12,7 @@ from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.chains import RetrievalQA
 
 # Load environment variables
-openai_api_key = os.getenv("OPENAI_API_KEY")  # make sure this is set
+openai_api_key = st.secrets["OPENAI_API_KEY"]   # make sure this is set
 
 class StreamlitApp:
     @staticmethod

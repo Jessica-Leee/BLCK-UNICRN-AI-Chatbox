@@ -2,7 +2,7 @@ import os
 import tiktoken
 import openai
 import fitz
-from pinecone import Pinecone, ServerlessSpec
+import pinecone
 import os  # Already imported
 
 # Streamlit secrets
