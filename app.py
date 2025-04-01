@@ -1,17 +1,30 @@
 import os
 import streamlit as st
 import requests
-from dotenv import load_dotenv
+
+# Try to import dotenv, but handle the case where it's not installed
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables from .env file if it exists
+except ImportError:
+    # If dotenv is not available, we'll use Streamlit secrets instead
+    pass
 import pinecone
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.chains import RetrievalQA
 
-# Load environment variables
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-pinecone_api_key = os.getenv("PINECONE_API_KEY")
-deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+# Get API keys from environment variables or Streamlit secrets
+def get_api_key(key_name):
+    # Try to get from Streamlit secrets first
+    if hasattr(st, "secrets") and key_name in st.secrets:
+        return st.secrets[key_name]
+    # Then try environment variables
+    return os.getenv(key_name)
+
+openai_api_key = get_api_key("OPENAI_API_KEY")
+pinecone_api_key = get_api_key("PINECONE_API_KEY")
+deepseek_api_key = get_api_key("DEEPSEEK_API_KEY")
 
 # Check for required API keys
 if not all([openai_api_key, pinecone_api_key, deepseek_api_key]):
@@ -56,9 +69,9 @@ Oneverse is part of blckunicrn.
 class PineconeRetriever:
     def __init__(self, pinecone_api_key, openai_api_key):
         # Initialize Pinecone connection
-        self.pc = Pinecone(api_key=pinecone_api_key)
+        pinecone.init(api_key=pinecone_api_key)
         self.index_name = "blckunicrn"
-        self.index = self.pc.Index(self.index_name)
+        self.index = pinecone.Index(self.index_name)
 
         # Initialize OpenAI model and embeddings
         self.embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
