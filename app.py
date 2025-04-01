@@ -1,18 +1,30 @@
 import os
 import streamlit as st
 import requests
-import os  # Already imported
-
-# Streamlit secrets
-openai_api_key = st.secrets["OPENAI_API_KEY"]
-pinecone_api_key = st.secrets["PINECONE_API_KEY"]
-from pinecone import Pinecone
+from dotenv import load_dotenv
+import pinecone
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.chains import RetrievalQA
 
 # Load environment variables
-openai_api_key = st.secrets["OPENAI_API_KEY"]   # make sure this is set
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+
+# Check for required API keys
+if not all([openai_api_key, pinecone_api_key, deepseek_api_key]):
+    missing_keys = []
+    if not openai_api_key:
+        missing_keys.append("OPENAI_API_KEY")
+    if not pinecone_api_key:
+        missing_keys.append("PINECONE_API_KEY")
+    if not deepseek_api_key:
+        missing_keys.append("DEEPSEEK_API_KEY")
+    
+    st.error(f"Missing required API keys: {', '.join(missing_keys)}. Please check your .env file.")
+    st.stop()
 
 class StreamlitApp:
     @staticmethod
@@ -69,16 +81,17 @@ class PineconeRetriever:
             return ''
 
 # Initialize the PineconeRetriever instance
-pinecone_api_key = os.getenv("PINECONE_API_KEY")
-print(pinecone_api_key)
-pinecone_retriever = PineconeRetriever(pinecone_api_key=pinecone_api_key, openai_api_key=openai_api_key)
+try:
+    pinecone_retriever = PineconeRetriever(pinecone_api_key=pinecone_api_key, openai_api_key=openai_api_key)
+except Exception as e:
+    st.error(f"Failed to initialize Pinecone retriever: {e}")
+    pinecone_retriever = None
 
 # Function to call DeepSeek API
 def call_deepseek_api(prompt):
-    api_key = os.getenv("DEEPSEEK_API_KEY")
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {deepseek_api_key}",
         "Content-Type": "application/json",
     }
     payload = {
@@ -104,7 +117,9 @@ if prompt := st.chat_input("Ask a question:"):
         st.write(prompt)
     
     # Retrieve additional context from Pinecone
-    retrieved_context = pinecone_retriever.query(prompt)
+    retrieved_context = ""
+    if pinecone_retriever:
+        retrieved_context = pinecone_retriever.query(prompt)
     
     # If retrieved_context is non-empty, append it to the default context.
     # Otherwise, use the default context alone.
