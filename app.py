@@ -16,10 +16,6 @@ from langchain.chains import RetrievalQA
 
 # Get API keys from environment variables or Streamlit secrets
 def get_api_key(key_name):
-    # Try to get from Streamlit secrets first
-    if hasattr(st, "secrets") and key_name in st.secrets:
-        return st.secrets[key_name]
-    # Then try environment variables
     return os.getenv(key_name)
 
 openai_api_key = get_api_key("OPENAI_API_KEY")
