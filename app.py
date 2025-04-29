@@ -107,55 +107,55 @@ except Exception as e:
     pinecone_retriever = None
 
 
-    # Function to call DeepSeek API (non-streaming)
-    def call_deepseek_api(prompt):
-        url = "https://api.deepseek.com/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {deepseek_api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": prompt}],
-        }
-        try:
-            response = requests.post(url, json=payload, headers=headers)
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"]
-            else:
-                st.error(f"Error: {response.status_code}, {response.text}")
-                return None
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+# Function to call DeepSeek API (non-streaming)
+def call_deepseek_api(prompt):
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {deepseek_api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            st.error(f"Error: {response.status_code}, {response.text}")
             return None
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return None
 
 
-    # DeepSeek streaming function
-    def call_deepseek_stream(prompt):
-        url = "https://api.deepseek.com/v1/chat/completions"
-        headers = {"Authorization": f"Bearer {deepseek_api_key}", "Content-Type": "application/json"}
-        payload = {"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}], "stream": True}
-        try:
-            response = requests.post(url, json=payload, headers=headers, stream=True)
-            response.raise_for_status()
-            for raw_line in response.iter_lines(decode_unicode=True):
-                if not raw_line:
-                    continue
-                line = raw_line.strip()
-                if line.startswith("data:"):
-                    line = line[len("data:"):].strip()
-                if not line or line == "[DONE]":
-                    continue
-                try:
-                    chunk = json.loads(line)
-                except ValueError:
-                    continue
-                delta = chunk.get("choices", [])[0].get("delta", {})
-                content = delta.get("content")
-                if content:
-                    yield content
-        except Exception as e:
-            st.error(f"An error occurred during streaming: {e}")
+# DeepSeek streaming function
+def call_deepseek_stream(prompt):
+    url = "https://api.deepseek.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {deepseek_api_key}", "Content-Type": "application/json"}
+    payload = {"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}], "stream": True}
+    try:
+        response = requests.post(url, json=payload, headers=headers, stream=True)
+        response.raise_for_status()
+        for raw_line in response.iter_lines(decode_unicode=True):
+            if not raw_line:
+                continue
+            line = raw_line.strip()
+            if line.startswith("data:"):
+                line = line[len("data:"):].strip()
+            if not line or line == "[DONE]":
+                continue
+            try:
+                chunk = json.loads(line)
+            except ValueError:
+                continue
+            delta = chunk.get("choices", [])[0].get("delta", {})
+            content = delta.get("content")
+            if content:
+                yield content
+    except Exception as e:
+        st.error(f"An error occurred during streaming: {e}")
 
 # Chat input and processing
 if prompt := st.chat_input("Ask a question:"):
